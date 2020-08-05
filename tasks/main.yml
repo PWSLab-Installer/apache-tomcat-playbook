@@ -31,7 +31,7 @@
 
     -   name: Grant permissions
         file:
-            path: /opt/tomcat/latest/bin/*.sh
+            path: /opt/tomcat/latest/bin/
             mode: '0755'
             owner: tomcat
 
