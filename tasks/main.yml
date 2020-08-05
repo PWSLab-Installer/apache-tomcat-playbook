@@ -1,0 +1,49 @@
+---
+    -   name: Add the user 'tomcat'.
+        user:
+            name: tomcat
+            system: yes
+            state: present
+            home: /opt/tomcat
+
+    -   name: Download latest Tomcat
+        get_url:
+            url: https://www-eu.apache.org/dist/tomcat/tomcat-9/v{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz
+            dest: /tmp
+
+    -   name: Extract Tomcat
+        unarchive:
+            src: /tmp/apache-tomcat-{{ tomcat_version }}.tar.gz
+            dest: /opt/tomcat/
+
+    -   name: Creating Short Link
+        become: true
+        file:
+            src: "/opt/tomcat/apache-tomcat-{{ tomcat_version }}"
+            dest: "/opt/tomcat/latest"
+            state: link
+
+    -   name: Grant permissions
+        file:
+            path: /opt/tomcat
+            recurse: yes
+            owner: tomcat
+
+    -   name: Grant permissions
+        file:
+            path: /opt/tomcat/latest/bin/*.sh
+            mode: '0755'
+            owner: tomcat
+
+    -   name: Set Tomcat service
+        become: true
+        template:
+            src: "tomcat.service.j2"
+            dest: "/etc/systemd/system/tomcat.service"
+
+    -   name: Restart tomcat
+        systemd:
+            name: tomcat
+            state: restarted
+            enabled: yes
+            daemon_reload: yes
